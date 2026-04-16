@@ -56,6 +56,7 @@ func (a *APIServer) registerRoutes() {
 
 	auth.GET("/users/me", userHandler.GetMe)
 	auth.POST("/devices", deviceHandler.CreateDevice)
+	auth.GET("/devices", deviceHandler.ListDevices)
 }
 
 func (a *APIServer) Run() {

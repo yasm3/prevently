@@ -50,11 +50,43 @@ func (h *DeviceHandler) CreateDevice(c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, dto.CreateDeviceResponse{
+	c.JSON(201, dto.DeviceResponse{
 		ID:     device.ID,
 		UserID: device.UserID,
 		Name:   device.Name,
 		Type:   device.Type,
 		Config: device.Config,
 	})
+}
+
+func (h *DeviceHandler) ListDevices(c *gin.Context) {
+	u, exists := c.Get(middleware.UserContextKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, ResponseError{Error: "Unauthorized"})
+		return
+	}
+	user, ok := u.(domain.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, ResponseError{Error: "Invalid user in context"})
+		return
+	}
+
+	devices, err := h.service.GetDevicesByUser(c.Request.Context(), user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ResponseError{Error: "Failed to get devices"})
+		return
+	}
+
+	returnDevices := make([]dto.DeviceResponse, 0, len(devices))
+	for _, d := range devices {
+		returnDevices = append(returnDevices, dto.DeviceResponse{
+			ID:     d.ID,
+			UserID: d.UserID,
+			Name:   d.Name,
+			Type:   d.Type,
+			Config: d.Config,
+		})
+	}
+
+	c.JSON(200, returnDevices)
 }

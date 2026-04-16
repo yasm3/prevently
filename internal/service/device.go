@@ -66,3 +66,23 @@ func (s *DeviceService) CreateDevice(
 		Config: row.Config,
 	}, nil
 }
+
+func (s *DeviceService) GetDevicesByUser(ctx context.Context, userId string) ([]domain.Device, error) {
+	rows, err := s.db.ListDevicesByUser(ctx, userId)
+	if err != nil {
+		return []domain.Device{}, err
+	}
+
+	devices := make([]domain.Device, 0, len(rows))
+	for _, row := range rows {
+		devices = append(devices, domain.Device{
+			ID:     row.ID,
+			UserID: row.UserID,
+			Name:   row.Name,
+			Type:   domain.DeviceType(row.Type),
+			Config: row.Config,
+		})
+	}
+
+	return devices, nil
+}
