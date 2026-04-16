@@ -12,8 +12,7 @@ func main() {
 	queries, pool := db.NewDB()
 	defer pool.Close()
 
-	router := api.NewRouter(logger)
+	server := api.NewServer(queries, logger)
 
-	server := api.NewServer(router, queries, logger)
 	server.Run()
 }
