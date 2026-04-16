@@ -2,3 +2,8 @@
 SELECT *
 FROM users
 WHERE id = $1;
+
+-- name: CreateUser :one
+INSERT INTO users (email, api_key)
+VALUES ($1, $2)
+RETURNING *;
