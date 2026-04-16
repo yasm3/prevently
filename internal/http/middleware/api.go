@@ -29,7 +29,7 @@ func APIKeyMiddleware(q *db.Queries) gin.HandlerFunc {
 		}
 
 		user := domain.User{
-			ID:    u.ID.String(),
+			ID:    u.ID,
 			Email: u.Email,
 		}
 

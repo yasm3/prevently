@@ -42,7 +42,10 @@ func (a *APIServer) registerRoutes() {
 	})
 
 	userService := service.NewUserService(a.DB)
+	deviceService := service.NewDeviceService(a.DB)
+
 	userHandler := handler.NewUserHandler(userService)
+	deviceHandler := handler.NewDeviceHandler(deviceService)
 
 	// guest
 	a.Router.POST("/users", userHandler.CreateUser)
@@ -50,7 +53,9 @@ func (a *APIServer) registerRoutes() {
 	// auth
 	auth := a.Router.Group("/")
 	auth.Use(middleware.APIKeyMiddleware(a.DB))
+
 	auth.GET("/users/me", userHandler.GetMe)
+	auth.POST("/devices", deviceHandler.CreateDevice)
 }
 
 func (a *APIServer) Run() {

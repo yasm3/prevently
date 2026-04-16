@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDevice = `-- name: CreateDevice :one
@@ -18,7 +16,7 @@ RETURNING id, user_id, name, type, config, created_at
 `
 
 type CreateDeviceParams struct {
-	UserID pgtype.UUID
+	UserID string
 	Name   string
 	Type   string
 	Config []byte
@@ -49,7 +47,7 @@ FROM devices
 WHERE user_id = $1
 `
 
-func (q *Queries) ListDevicesByUser(ctx context.Context, userID pgtype.UUID) ([]Device, error) {
+func (q *Queries) ListDevicesByUser(ctx context.Context, userID string) ([]Device, error) {
 	rows, err := q.db.Query(ctx, listDevicesByUser, userID)
 	if err != nil {
 		return nil, err

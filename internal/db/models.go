@@ -9,8 +9,8 @@ import (
 )
 
 type Device struct {
-	ID        pgtype.UUID
-	UserID    pgtype.UUID
+	ID        string
+	UserID    string
 	Name      string
 	Type      string
 	Config    []byte
@@ -18,7 +18,7 @@ type Device struct {
 }
 
 type User struct {
-	ID        pgtype.UUID
+	ID        string
 	Email     string
 	ApiKey    string
 	CreatedAt pgtype.Timestamptz

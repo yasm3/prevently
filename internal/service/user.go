@@ -25,7 +25,7 @@ type CreateUserResponse struct {
 }
 
 func (s *UserService) GetUserByID(ctx context.Context, uuid pgtype.UUID) (db.User, error) {
-	return s.db.GetUserByID(ctx, uuid)
+	return s.db.GetUserByID(ctx, uuid.String())
 }
 
 func (s *UserService) CreateUser(ctx context.Context, email string) (domain.User, string, error) {
@@ -43,7 +43,7 @@ func (s *UserService) CreateUser(ctx context.Context, email string) (domain.User
 	}
 
 	return domain.User{
-		ID:    user.ID.String(),
+		ID:    user.ID,
 		Email: user.Email,
 	}, apiKey, nil
 }
