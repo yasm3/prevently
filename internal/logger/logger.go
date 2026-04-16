@@ -59,10 +59,6 @@ func (l *Logger) Error(msg string) {
 	l.Log(ERROR, msg)
 }
 
-func itoa(i int) string {
-	return strconv.Itoa(i)
-}
-
 func (l *Logger) GinMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -85,7 +81,7 @@ func (l *Logger) GinMiddleware() gin.HandlerFunc {
 
 		l.Log(level,
 			method+" "+path+
-				" | status="+itoa(status)+
+				" | status="+strconv.Itoa(status)+
 				" | duration="+duration.String(),
 		)
 	}
