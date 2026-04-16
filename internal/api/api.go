@@ -13,7 +13,7 @@ type APIServer struct {
 
 func NewServer(r *gin.Engine, l *logger.Logger) *APIServer {
 	server := APIServer{
-		Port:   "8080",
+		Port:   "8000",
 		Router: r,
 		Logger: l,
 	}
