@@ -8,9 +8,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Device struct {
+	ID        pgtype.UUID
+	UserID    pgtype.UUID
+	Name      string
+	Type      string
+	Config    []byte
+	CreatedAt pgtype.Timestamptz
+}
+
 type User struct {
 	ID        pgtype.UUID
 	Email     string
 	ApiKey    string
-	CreatedAt pgtype.Timestamp
+	CreatedAt pgtype.Timestamptz
 }
