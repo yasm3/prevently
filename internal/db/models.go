@@ -5,8 +5,55 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type PushStatus string
+
+const (
+	PushStatusPending    PushStatus = "pending"
+	PushStatusProcessing PushStatus = "processing"
+	PushStatusSent       PushStatus = "sent"
+	PushStatusFailed     PushStatus = "failed"
+)
+
+func (e *PushStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PushStatus(s)
+	case string:
+		*e = PushStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PushStatus: %T", src)
+	}
+	return nil
+}
+
+type NullPushStatus struct {
+	PushStatus PushStatus
+	Valid      bool // Valid is true if PushStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPushStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.PushStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PushStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPushStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PushStatus), nil
+}
 
 type Device struct {
 	ID        string
@@ -15,6 +62,17 @@ type Device struct {
 	Type      string
 	Config    []byte
 	CreatedAt pgtype.Timestamptz
+}
+
+type Push struct {
+	ID        string
+	UserID    string
+	Message   string
+	Status    string
+	Attempts  int32
+	LastError pgtype.Text
+	CreatedAt pgtype.Timestamptz
+	SentAt    pgtype.Timestamptz
 }
 
 type User struct {
