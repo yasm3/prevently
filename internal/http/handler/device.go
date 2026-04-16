@@ -36,6 +36,7 @@ func (h *DeviceHandler) CreateDevice(c *gin.Context) {
 	user, ok := u.(domain.User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, ResponseError{Error: "Invalid user in context"})
+		return
 	}
 
 	device, err := h.service.CreateDevice(
