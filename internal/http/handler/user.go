@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yasm3/prevently/internal/http/dto"
 	"github.com/yasm3/prevently/internal/service"
 )
 
@@ -30,4 +33,27 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(200, user)
+}
+
+func (h *UserHandler) CreateUser(c *gin.Context) {
+	var body dto.CreateUserSchema
+	err := c.ShouldBindJSON(&body)
+	if err != nil {
+		c.JSON(400, ResponseError{Error: err.Error()})
+		return
+	}
+
+	body.Email = strings.TrimSpace(strings.ToLower(body.Email))
+
+	user, apiKey, err := h.service.CreateUser(c.Request.Context(), body.Email)
+	if err != nil {
+		c.JSON(400, ResponseError{Error: err.Error()})
+		return
+	}
+
+	c.JSON(200, dto.CreateUserResponse{
+		ID:     user.ID,
+		Email:  user.Email,
+		APIKey: apiKey,
+	})
 }
