@@ -9,3 +9,8 @@ type CreateUserResponse struct {
 	Email  string `json:"email"`
 	APIKey string `json:"apiKey"`
 }
+
+type GetUserResponse struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+}

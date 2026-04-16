@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yasm3/prevently/internal/db"
 	"github.com/yasm3/prevently/internal/http/handler"
+	"github.com/yasm3/prevently/internal/http/middleware"
 	"github.com/yasm3/prevently/internal/logger"
 	"github.com/yasm3/prevently/internal/service"
 )
@@ -43,8 +44,13 @@ func (a *APIServer) registerRoutes() {
 	userService := service.NewUserService(a.DB)
 	userHandler := handler.NewUserHandler(userService)
 
-	a.Router.GET("/users", userHandler.GetUser)
+	// guest
 	a.Router.POST("/users", userHandler.CreateUser)
+
+	// auth
+	auth := a.Router.Group("/")
+	auth.Use(middleware.APIKeyMiddleware(a.DB))
+	auth.GET("/users/me", userHandler.GetMe)
 }
 
 func (a *APIServer) Run() {

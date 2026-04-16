@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/yasm3/prevently/internal/domain"
 	"github.com/yasm3/prevently/internal/http/dto"
 	"github.com/yasm3/prevently/internal/service"
 )
@@ -55,5 +56,19 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		ID:     user.ID,
 		Email:  user.Email,
 		APIKey: apiKey,
+	})
+}
+
+func (h *UserHandler) GetMe(c *gin.Context) {
+	u, exists := (c.Get("user"))
+	if !exists {
+		c.JSON(500, ResponseError{Error: "User not in context"})
+	}
+
+	user := u.(domain.User)
+
+	c.JSON(200, dto.GetUserResponse{
+		ID:    user.ID,
+		Email: user.Email,
 	})
 }
