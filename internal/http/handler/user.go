@@ -4,10 +4,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yasm3/prevently/internal/domain"
 	"github.com/yasm3/prevently/internal/http/dto"
+	"github.com/yasm3/prevently/internal/http/middleware"
 	"github.com/yasm3/prevently/internal/service"
 )
 
@@ -21,26 +20,11 @@ func NewUserHandler(s *service.UserService) *UserHandler {
 	}
 }
 
-func (h *UserHandler) GetUser(c *gin.Context) {
-	// fake uuid test
-	u, _ := uuid.NewV4()
-	var pgid pgtype.UUID
-	_ = pgid.Scan(u.String())
-
-	user, err := h.service.GetUserByID(c.Request.Context(), pgid)
-	if err != nil {
-		c.JSON(404, ResponseError{Error: err.Error()})
-		return
-	}
-
-	c.JSON(200, user)
-}
-
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var body dto.CreateUserSchema
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
-		c.JSON(400, ResponseError{Error: err.Error()})
+		c.JSON(500, ResponseError{Error: err.Error()})
 		return
 	}
 
@@ -48,11 +32,11 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	user, apiKey, err := h.service.CreateUser(c.Request.Context(), body.Email)
 	if err != nil {
-		c.JSON(400, ResponseError{Error: err.Error()})
+		c.JSON(500, ResponseError{Error: err.Error()})
 		return
 	}
 
-	c.JSON(200, dto.CreateUserResponse{
+	c.JSON(201, dto.CreateUserResponse{
 		ID:     user.ID,
 		Email:  user.Email,
 		APIKey: apiKey,
@@ -60,12 +44,17 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 }
 
 func (h *UserHandler) GetMe(c *gin.Context) {
-	u, exists := (c.Get("user"))
+	u, exists := (c.Get(middleware.UserContextKey))
 	if !exists {
 		c.JSON(500, ResponseError{Error: "User not in context"})
+		return
 	}
 
-	user := u.(domain.User)
+	user, ok := u.(domain.User)
+	if !ok {
+		c.JSON(500, ResponseError{Error: "Invalid user type"})
+		return
+	}
 
 	c.JSON(200, dto.GetUserResponse{
 		ID:    user.ID,

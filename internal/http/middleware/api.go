@@ -9,7 +9,7 @@ import (
 	"github.com/yasm3/prevently/internal/security"
 )
 
-const userContextKey = "user"
+const UserContextKey = "user"
 
 func APIKeyMiddleware(q *db.Queries) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -33,7 +33,7 @@ func APIKeyMiddleware(q *db.Queries) gin.HandlerFunc {
 			Email: u.Email,
 		}
 
-		c.Set(userContextKey, user)
+		c.Set(UserContextKey, user)
 		c.Next()
 	}
 }
