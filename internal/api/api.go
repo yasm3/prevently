@@ -2,10 +2,10 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/yasm3/prevently/internal/db"
+	"github.com/yasm3/prevently/internal/handler"
 	"github.com/yasm3/prevently/internal/logger"
+	"github.com/yasm3/prevently/internal/service"
 )
 
 type APIServer struct {
@@ -40,16 +40,10 @@ func (a *APIServer) registerRoutes() {
 		})
 	})
 
-	a.Router.GET("/users", func(c *gin.Context) {
-		u, _ := uuid.NewV4()
-		var pgid pgtype.UUID
-		_ = pgid.Scan(u.String())
-		res, err := a.DB.GetUserByID(c, pgid)
-		if err != nil {
-			c.JSON(404, err.Error())
-		}
-		c.JSON(200, res)
-	})
+	userService := service.NewUserService(a.DB)
+	userHandler := handler.NewUserHandler(userService)
+
+	a.Router.GET("/users", userHandler.GetUser)
 }
 
 func (a *APIServer) Run() {
