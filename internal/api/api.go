@@ -35,9 +35,9 @@ func NewServer(db *db.Queries, l *logger.Logger) *APIServer {
 }
 
 func (a *APIServer) registerRoutes() {
-	a.Router.GET("/ping", func(c *gin.Context) {
+	a.Router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "pong",
+			"status": "ok",
 		})
 	})
 
