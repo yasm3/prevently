@@ -6,11 +6,11 @@ Notification broker for multiples devices and endpoints.
 
 ## Endpoints V1
 
-- [ ] **POST /users** : Create new user (register)
-- [ ] **GET /users/me** : Get essential info of my user
-- [ ] **POST /devices** : Add device to my account
-- [ ] **GET /devices** : Get list of my devices
-- [ ] **POST /push** : Send notification to all my devices
+- [x] **POST /users** : Create new user (register)
+- [x] **GET /users/me** : Get essential info of my user
+- [x] **POST /devices** : Add device to my account
+- [x] **GET /devices** : Get list of my devices
+- [x] **POST /push** : Send notification to all my devices
 
 ## License
 
