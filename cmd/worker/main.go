@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/yasm3/prevently/internal/db"
@@ -13,10 +14,15 @@ func main() {
 	ctx := context.Background()
 	logger := logger.New()
 
-	db, pool := db.NewDB()
+	dbUrl := os.Getenv("DB_URL")
+	if dbUrl == "" {
+		dbUrl = "postgres://prevently:prevently@localhost:5432/prevently?sslmode=disable"
+	}
+
+	queries, pool := db.NewDB(dbUrl)
 	defer pool.Close()
 
-	pushService := service.NewPushService(db)
+	pushService := service.NewPushService(queries)
 
 	logger.Info("Worker started...")
 

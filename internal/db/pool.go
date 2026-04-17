@@ -6,10 +6,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewDB() (*Queries, *pgxpool.Pool) {
+func NewDB(dbUrl string) (*Queries, *pgxpool.Pool) {
 	pool, err := pgxpool.New(
 		context.Background(),
-		"postgres://prevently:prevently@localhost:5432/prevently?sslmode=disable",
+		dbUrl,
 	)
 	if err != nil {
 		panic(err)
