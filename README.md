@@ -6,6 +6,7 @@ Notification broker for multiples devices and endpoints.
 
 ## Endpoints V1
 
+- [x] **GET /health** : Basic health check
 - [x] **POST /users** : Create new user (register)
 - [x] **GET /users/me** : Get essential info of my user
 - [x] **POST /devices** : Add device to my account
