@@ -7,9 +7,19 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    
     permissions:
       contents: read
       packages: write
+      
+    strategy:
+      matrix:
+        include:
+          - service: api
+            dockerfile: Dockerfile.api
+          - service: worker
+            dockerfile: Dockerfile.worker
+            
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -20,38 +30,23 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Extract API meta
-        id: meta_api
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository }}/api
-
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-
-      - name: Build and push API image
-        uses: docker/build-push-action@v7
-        with:
-          push: true
-          context: .
-          file: ./Dockerfile.api
-          tags: ${{ steps.meta_api.outputs.tags }}
-      
-      - name: Extract Worker meta
-        id: meta_worker
+          
+      - name: Extract meta
+        id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.repository }}/worker
+          images: ghcr.io/${{ github.repository }}/${{ matrix.service }}
 
-      - name: Build and push Worker image
+      - name: Build and push images
         uses: docker/build-push-action@v7
         with:
           push: true
           context: .
-          file: ./Dockerfile.worker
-          tags: ${{ steps.meta_worker.outputs.tags }}
-        
-      
-      
+          file: ./${{ matrix.dockerfile }}
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           
