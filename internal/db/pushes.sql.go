@@ -7,7 +7,51 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const claimPendingPushes = `-- name: ClaimPendingPushes :many
+UPDATE pushes
+SET status = 'processing'
+WHERE id IN (
+    SELECT id
+    FROM pushes
+    WHERE status = 'pending'
+    ORDER BY created_at
+    LIMIT $1
+)
+RETURNING id, user_id, message, status, attempts, last_error, created_at, sent_at
+`
+
+func (q *Queries) ClaimPendingPushes(ctx context.Context, limit int32) ([]Push, error) {
+	rows, err := q.db.Query(ctx, claimPendingPushes, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Push
+	for rows.Next() {
+		var i Push
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Message,
+			&i.Status,
+			&i.Attempts,
+			&i.LastError,
+			&i.CreatedAt,
+			&i.SentAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const createPush = `-- name: CreatePush :one
 INSERT INTO pushes (user_id, message)
@@ -22,6 +66,57 @@ type CreatePushParams struct {
 
 func (q *Queries) CreatePush(ctx context.Context, arg CreatePushParams) (Push, error) {
 	row := q.db.QueryRow(ctx, createPush, arg.UserID, arg.Message)
+	var i Push
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Message,
+		&i.Status,
+		&i.Attempts,
+		&i.LastError,
+		&i.CreatedAt,
+		&i.SentAt,
+	)
+	return i, err
+}
+
+const markPushFailed = `-- name: MarkPushFailed :one
+UPDATE pushes
+SET status = 'failed', last_error = $2, attempts = attempts + 1
+WHERE id = $1
+RETURNING id, user_id, message, status, attempts, last_error, created_at, sent_at
+`
+
+type MarkPushFailedParams struct {
+	ID        string
+	LastError pgtype.Text
+}
+
+func (q *Queries) MarkPushFailed(ctx context.Context, arg MarkPushFailedParams) (Push, error) {
+	row := q.db.QueryRow(ctx, markPushFailed, arg.ID, arg.LastError)
+	var i Push
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Message,
+		&i.Status,
+		&i.Attempts,
+		&i.LastError,
+		&i.CreatedAt,
+		&i.SentAt,
+	)
+	return i, err
+}
+
+const markPushSent = `-- name: MarkPushSent :one
+UPDATE pushes
+SET status = 'sent', attempts = attempts + 1
+WHERE id = $1
+RETURNING id, user_id, message, status, attempts, last_error, created_at, sent_at
+`
+
+func (q *Queries) MarkPushSent(ctx context.Context, id string) (Push, error) {
+	row := q.db.QueryRow(ctx, markPushSent, id)
 	var i Push
 	err := row.Scan(
 		&i.ID,
