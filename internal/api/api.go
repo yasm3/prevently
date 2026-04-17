@@ -50,7 +50,7 @@ func (a *APIServer) registerRoutes() {
 	pushHandler := handler.NewPushHandler(pushService)
 
 	// guest
-	a.Router.POST("/users", userHandler.CreateUser)
+	a.Router.POST("/users", middleware.RegistrationEnabled(), userHandler.CreateUser)
 
 	// auth
 	auth := a.Router.Group("/")
