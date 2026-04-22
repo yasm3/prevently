@@ -4,6 +4,8 @@ Notification broker for multiples devices and endpoints.
 
 # Roadmap
 
+- [x] Docker Images
+
 ## Endpoints V1
 
 - [x] **GET /health** : Basic health check
